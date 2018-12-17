@@ -3,7 +3,7 @@ local module = {}
 local m = nil
 
 local function send_ping()
-    m:publish("/connect",node.chipid() .. "|" .. lights.currentColor(),0,0)
+    m:publish("/connect",node.chipid(),0,0)
 end
 
 local function subscribe_all()
@@ -18,11 +18,9 @@ local function do_mqtt_connect()
         instruction, hex = message:match("([^|]+)|(.+)");
         if instruction == "C" then
           print(hex)
-          lights.fill(hex)
+          lights.fillHex(hex)
         else
-          print("no message")
-          --lights.stop()
-          --lights.clear()
+          lights.clear()
         end
       end
     end)
