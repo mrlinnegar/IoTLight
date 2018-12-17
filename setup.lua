@@ -1,10 +1,10 @@
 function startup()
-    lights.fill(128, 0, 0);
+    --lights.fill(128, 0, 0);
     app.start()
 end
 
 wifi_connect_event = function(T)
-  lights.fill(128,128,0);
+  -- lights.fill(128,128,0);
   print("Connection to AP("..T.SSID..") established!")
   print("Waiting for IP address...")
   if disconnect_ct ~= nil then disconnect_ct = nil end
@@ -20,7 +20,7 @@ wifi_got_ip_event = function(T)
 end
 
 wifi_disconnect_event = function(T)
-  lights.clear();
+  --lights.clear();
   if T.reason == wifi.eventmon.reason.ASSOC_LEAVE then
     --the station has disassociated from a previously connected AP
     return

@@ -15,19 +15,14 @@ local function do_mqtt_connect()
 
     m:on("message", function(conn, topic, message)
       if message ~= nil then
-        instruction, data = message:match("([^|]+)|(.+)");
-        if instruction == "A" then
-          loop, frameCount, frameRate, animationData = data:match("([^,]+),([^,]+),([^,]+),(.+)")
-          if(lights.validateSequence(tonumber(frameCount), animationData)) then
-            lights.stop();
-            lights.createSquence(loop == '0', tonumber(frameCount), tonumber(frameRate), animationData)
-            lights.start();
-          else
-            print("Invalid light sequence");
-          end
+        instruction, hex = message:match("([^|]+)|(.+)");
+        if instruction == "C" then
+          print(hex)
+          lights.fill(hex)
         else
-          lights.stop()
-          lights.clear()
+          print("no message")
+          --lights.stop()
+          --lights.clear()
         end
       end
     end)

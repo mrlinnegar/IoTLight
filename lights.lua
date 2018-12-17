@@ -77,9 +77,10 @@ function module.createSquence( shouldLoop, frameCount, frameRate, sequence)
 
 end
 
-function module.fill(green, red, blue)
+function module.fill(hex)
+  color = hexToColor(hex);
   fillBuffer = ws2812.newBuffer(NUMBER_OF_BULBS, BYTES_PER_BULB)
-  fillBuffer:fill(green, red, blue)
+  fillBuffer:fill(color[1], color[2], color[3]);
   ws2812.write(fillBuffer);
 end
 
