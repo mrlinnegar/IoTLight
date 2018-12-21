@@ -14,7 +14,7 @@ local currentColor = {0,0,0}
 local function animate()
   color = frames[currentFrame];
   fillBuffer = ws2812.newBuffer(NUMBER_OF_BULBS, BYTES_PER_BULB)
-  fillBuffer:fill(color[1], color[2], color[3])
+  fillBuffer:fill(color[2], color[1], color[3])
   ws2812.write(fillBuffer);
 
   currentFrame = currentFrame + 1;
@@ -24,24 +24,26 @@ local function animate()
   end
 end
 
-function hexToColor(hex)
+local function hexToColor(hex)
  local r = tonumber(string.sub(hex, 1, 2), 16);
  local g = tonumber(string.sub(hex, 3, 4), 16);
  local b = tonumber(string.sub(hex, 5, 6), 16);
- return {g,r,b};
+ return {r, g, b};
 end
 
+local function lerp(a, b, u)
+  return (1-u) * a + u * b;
+end
 
 local function createSequence( targetColor )
   newFrames = {}
 
-  rIndex = ((targetColor[1] - currentColor[1]) / FRAMES_PER_SECOND);
-  gIndex = ((targetColor[2] - currentColor[2]) / FRAMES_PER_SECOND);
-  bIndex = ((targetColor[3] - currentColor[3]) / FRAMES_PER_SECOND);
-
-
   for index=1,FRAMES_PER_SECOND do
-    frame = { currentColor[1] + (rIndex * index), currentColor[2] + (gIndex * index), currentColor[3] + (bIndex * index) };
+    r = lerp( currentColor[1], targetColor[1], index / FRAMES_PER_SECOND);
+    g = lerp( currentColor[2], targetColor[2], index / FRAMES_PER_SECOND);
+    b = lerp( currentColor[3], targetColor[3], index / FRAMES_PER_SECOND);
+
+    frame = { r, g, b };
     newFrames[index] = frame;
   end
 
@@ -51,11 +53,8 @@ local function createSequence( targetColor )
   frames = newFrames
 end
 
-
-function module.clear()
-  clearBuffer = ws2812.newBuffer(NUMBER_OF_BULBS, BYTES_PER_BULB)
-  clearBuffer:fill(0,0,0)
-  ws2812.write(clearBuffer)
+local function validateHex ( hexString )
+  return (hexString:len() == 6)
 end
 
 local function start()
@@ -69,11 +68,18 @@ local function start()
   animation:start()
 end
 
+function module.clear()
+  clearBuffer = ws2812.newBuffer(NUMBER_OF_BULBS, BYTES_PER_BULB)
+  clearBuffer:fill(0,0,0)
+  ws2812.write(clearBuffer)
+end
 
 function module.fillHex(hexString)
-  color = hexToColor(hex)
-  createSequence(color)
-  start()
+  if(validateHex(hexString))
+    color = hexToColor(hex)
+    createSequence(color)
+    start()
+  end
 end
 
 function module.fillRGB(red, green, blue)
@@ -90,6 +96,21 @@ end
 
 function module.currentColor()
   return currentColor
+end
+
+function module.handleMessage(message)
+  instruction, hex = message:match("([^|]+)|(.+)");
+  if instruction == "C" then
+    fillHex(hex)
+  end
+end
+
+function module.getTopic()
+  return "/color"
+end
+
+function module.getUpdate()
+  return "COLOR"
 end
 
 ws2812.init();
