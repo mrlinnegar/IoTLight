@@ -1,14 +1,14 @@
 local module = {}
 
 local BYTES_PER_BULB = 3
-local FRAMES_PER_SECOND = 16
+local FRAMES_PER_SECOND = 32
 local NUMBER_OF_BULBS = 16
 
 local frames = {}
 local currentFrame = 1
 local animation = nil
 
-local numberOfFrames = 16;
+local numberOfFrames = FRAMES_PER_SECOND;
 local currentColor = {0,0,0}
 
 local function animate()
@@ -16,7 +16,6 @@ local function animate()
   fillBuffer = ws2812.newBuffer(NUMBER_OF_BULBS, BYTES_PER_BULB)
   fillBuffer:fill(color[2], color[1], color[3])
   ws2812.write(fillBuffer);
-
   currentFrame = currentFrame + 1;
 
   if(currentFrame > numberOfFrames) then
@@ -29,6 +28,17 @@ local function hexToColor(hex)
  local g = tonumber(string.sub(hex, 3, 4), 16);
  local b = tonumber(string.sub(hex, 5, 6), 16);
  return {r, g, b};
+end
+
+
+local function rgbToHex(rgb)
+    local hexadecimal = ''
+
+    for key, value in pairs(rgb) do
+        hexadecimal = hexadecimal .. value .. ','
+    end
+
+    return hexadecimal
 end
 
 local function lerp(a, b, u)
@@ -75,7 +85,7 @@ function module.clear()
 end
 
 function module.fillHex(hexString)
-  if(validateHex(hexString))
+  if(validateHex(hexString)) then
     color = hexToColor(hex)
     createSequence(color)
     start()
@@ -101,7 +111,7 @@ end
 function module.handleMessage(message)
   instruction, hex = message:match("([^|]+)|(.+)");
   if instruction == "C" then
-    fillHex(hex)
+    module.fillHex(hex)
   end
 end
 
@@ -110,7 +120,7 @@ function module.getTopic()
 end
 
 function module.getUpdate()
-  return "COLOR"
+  return rgbToHex(currentColor)
 end
 
 ws2812.init();

@@ -13,6 +13,7 @@ end
 
 wifi_got_ip_event = function(T)
   print("Wifi connection is ready! IP address is: "..T.IP)
+  lights.fillRGB(0,128,0)
   tmr.create():alarm(1000, tmr.ALARM_SINGLE, startup)
 end
 
